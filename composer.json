@@ -1,0 +1,7 @@
+{
+    "require": {
+        "symfony/class-loader" : "dev-master",
+        "symfony/console" : "dev-master",
+        "symfony/process" : "dev-master"
+    }
+}

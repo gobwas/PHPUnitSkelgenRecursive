@@ -1,0 +1,16 @@
+#!/usr/bin/php
+<?php
+require_once dirname(__DIR__).'/vendor/autoload.php';
+
+use Symfony\Component\ClassLoader\UniversalClassLoader;
+use Symfony\Component\Console\Output\ConsoleOutput;
+use RecursivePHPUnitSkelgen\SkelgenRecursive;
+use Symfony\Component\Console\Application;
+
+$loader = new UniversalClassLoader();
+$loader->registerNamespace('RecursivePHPUnitSkelgen', dirname(__DIR__).'/src');
+$loader->register();
+
+$application = new Application("Recursive calling of phpunit-skelgen by Sergey Kamardin", "0.1.0-alpha");
+$application->add(new SkelgenRecursive());
+$application->run();
