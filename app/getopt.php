@@ -1,49 +1,90 @@
 <?php
+
+
 class Application
 {
 	protected $options = array();
 	protected $arguments = array();
+	protected $object = null;
+	protected $method = null;
+	protected $name;
+	protected $description;
+	protected $version;
+	protected $author;
 
-	public function __construct()
+	public function __construct($name, $object, $method)
 	{
-
+		$this->object = $object;
+		$this->method = $method;
+		$this->name   = $name;
 	}
 
-	public function addArgument($argument, $required, $description)
+	public function addArgument($name, $required, $description)
 	{
 		$arg = new stdClass();
-		$arg->argument    = $argument;
+		$arg->name        = $name;
 		$arg->required    = $required;
 		$arg->description = $description;
+		$arg->type        = 'arg';
 
 		$this->arguments[] = $arg;
 	}
 
-	public function addOption($option, $required, $description)
+	public function addOption($name, $required, $description)
 	{
 		$opt = new stdClass();
-		$opt->option      = $option;
+		$opt->name        = $name;
 		$opt->required    = $required;
 		$opt->description = $description;
+		$opt->type        = 'opt';
 
 		$this->options[] = $opt;
 	}
 
 	public function setDescription($description)
 	{
-
+		$this->description = $description;
 	}
 
-	public function setVersion()
+	public function setVersion($version)
+	{
+		$this->version = $version;
+	}
+
+	public function setAuthor($author)
+	{
+		$this->author = $author;
+	}
+
+	public function run($argv)
 	{
 
 	}
 
-	public function setAuthor()
+	public function getUsage()
 	{
+		$usage = array($this->name);
+		$description = array();
 
+		$all = array_merge($this->options, $this->arguments);
+
+		foreach ($all as $rule) {
+			$spr = $rule->required ? ($rule->type == 'opt' ? '-%s' : '%s') : ($rule->type == 'opt' ? '[-%s]' : '[%s]');
+			$usage[] = sprintf($spr, $rule->name);
+			$description[] = sprintf("\t-%s\t%s (%s)", $rule->name, $rule->description, $rule->required ? 'required' : 'optional');
+		}
+
+		echo "\nUsage:\t".(implode(' ', $usage))."\n";
 	}
 }
+
+$app = new Application('test', 'Class', 'run');
+$app->addArgument('arg', true, 'hello');
+$app->addOption('opt', true, 'option');
+$app->addArgument('argsec', false, 'hello esc');
+$app->addOption('optsec', false, 'option sec');
+
+$app->getUsage();
 /*$rules = call_user_func(function() {require __DIR__.'/options.php'; return $options;});
 
 // TODO make description class
