@@ -1,4 +1,49 @@
 <?php
+class Application
+{
+	protected $options = array();
+	protected $arguments = array();
+
+	public function __construct()
+	{
+
+	}
+
+	public function addArgument($argument, $required, $description)
+	{
+		$arg = new stdClass();
+		$arg->argument    = $argument;
+		$arg->required    = $required;
+		$arg->description = $description;
+
+		$this->arguments[] = $arg;
+	}
+
+	public function addOption($option, $required, $description)
+	{
+		$opt = new stdClass();
+		$opt->option      = $option;
+		$opt->required    = $required;
+		$opt->description = $description;
+
+		$this->options[] = $opt;
+	}
+
+	public function setDescription($description)
+	{
+
+	}
+
+	public function setVersion()
+	{
+
+	}
+
+	public function setAuthor()
+	{
+
+	}
+}
 /*$rules = call_user_func(function() {require __DIR__.'/options.php'; return $options;});
 
 // TODO make description class

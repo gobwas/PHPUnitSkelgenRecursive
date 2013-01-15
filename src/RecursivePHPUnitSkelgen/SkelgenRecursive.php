@@ -32,18 +32,24 @@ class SkelgenRecursive extends Command
 			->addArgument(
 				'to',
 				InputArgument::REQUIRED,
-				'Test classes destination'
+				'Test classes destination.'
 			)
 			->addArgument(
 				'bootstrap',
 				InputArgument::OPTIONAL,
-				'Bootstrap file for tests'
+				'Bootstrap file for tests.'
+			)
+			->addOption(
+				'prepare',
+				'p',
+				InputOption::VALUE_NONE,
+				'Do not create any files or directories - just show, what will be created.'
 			)
 			->addOption(
 				'xml',
 				'x',
 				InputOption::VALUE_NONE,
-				'If set, will generate a phpunit.xml file in source directory (not implemented yet)'
+				'If set, will generate a phpunit.xml file in source directory (not implemented yet).'
 			)
 		;
 	}
@@ -75,7 +81,7 @@ class SkelgenRecursive extends Command
 			if (!empty($offset)) {
 				$target = $to->getPath().$offset;
 				if (!is_dir($target)) {
-					Directory::recursiveMake($to, $target, $output);
+					Directory::recursiveMake($to, $target, $input, $output);
 				}
 			} else {
 				$target = $to->getPath();
@@ -90,14 +96,18 @@ class SkelgenRecursive extends Command
 
 			$command = sprintf("phpunit-skelgen %s --test -- \"%s\" %s %s %s", $bootstrap, $unitClass, $unitFile, $testClass, $testFile);
 
-			$process = new Process($command);
-			$process->run();
-
-			if ($process->isSuccessful()) {
-				$output->writeln("<info>Successfully created test: $testFile</info>");
+			if ($input->getOption('prepare')) {
+				$output->writeln("<comment>Preparing generation: </comment><info>Will run command $command</info>");
 			} else {
-				$output->writeln("<error>Can not create test: $testFile</error>");
-				$output->writeln("<error>\t{$process->getErrorOutput()}</error>");
+				$process = new Process($command);
+				$process->run();
+
+				if ($process->isSuccessful()) {
+					$output->writeln("<info>Successfully created test: $testFile</info>");
+				} else {
+					$output->writeln("<error>Can not create test: $testFile</error>");
+					$output->writeln("<error>\t{$process->getErrorOutput()}</error>");
+				}
 			}
 		}
 	}

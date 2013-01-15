@@ -1,6 +1,7 @@
 <?php
 namespace RecursivePHPUnitSkelgen;
 use RecursivePHPUnitSkelgen\Exception\ApplicationException;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Closure;
 
@@ -68,7 +69,7 @@ class Directory extends FSEntry
 		return $files;
 	}
 
-	public static function recursiveMake(Directory $base, $path, OutputInterface $output)
+	public static function recursiveMake(Directory $base, $path, InputInterface $input, OutputInterface $output)
 	{
 		if (strstr($path, $base->getPath())) {
 			$pathList = explode('/', str_replace($base->getPath(), '', $path));
@@ -77,11 +78,16 @@ class Directory extends FSEntry
 				if (!empty($path)) {
 					$curPath.= $path.'/';
 					if (!is_dir($curPath)) {
-						if (@mkdir($curPath)) {
-							$output->writeln("<comment>Successfully created directory $curPath</comment>");
+						if ($input->getOption('prepare')) {
+							$output->writeln("<comment>Preparing generation: </comment><info>Will create directory $curPath</info>");
 						} else {
-							$output->writeln("<error>Can not create directory $curPath</error>");
+							if (@mkdir($curPath)) {
+								$output->writeln("<comment>Successfully created directory $curPath</comment>");
+							} else {
+								$output->writeln("<error>Can not create directory $curPath</error>");
+							}
 						}
+
 					}
 				}
 			}
