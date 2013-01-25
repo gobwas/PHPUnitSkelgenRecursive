@@ -14,7 +14,7 @@ use Symfony\Component\Console\Helper\DialogHelper;
 class SkelgenRecursive extends Command
 {
 	const NAME        = 'RecursivePHPUnitSkelgen';
-	const VERSION     = '0.2.0';
+	const VERSION     = '0.2.1-dev';
 
 	const POSTFIX   = 'Test';
 	const GENERATOR = 'phpunit-skelgen';
