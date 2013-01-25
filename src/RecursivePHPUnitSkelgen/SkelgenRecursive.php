@@ -123,7 +123,7 @@ class SkelgenRecursive extends Command
 
 			$command = sprintf("phpunit-skelgen %s --test -- \"%s\" %s %s %s", $bootstrap, $unitClassPath, $unitFile, $testClass, $testFile);
 
-			$question = is_file($testFile) ? "<red>File already exists. Do u want to overwrite it? (y/n) </red>" : "Create test '$testClass' in '$testFile'? (y/n) ";
+			$question = is_file($testFile) ? "<red>File '$testFile' already exists. Do u want to overwrite it? (y/n) </red>" : "Create test '$testClass' in '$testFile'? (y/n) ";
 
 			if ($input->getOption('force') or $dialog->askConfirmation($output, $question)) {
 				$process = new Process($command);
