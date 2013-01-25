@@ -11,6 +11,6 @@ $loader = new UniversalClassLoader();
 $loader->registerNamespace('RecursivePHPUnitSkelgen', dirname(__DIR__).'/src');
 $loader->register();
 
-$application = new Application("Recursive calling of phpunit-skelgen by Sergey Kamardin", "0.1.0-alpha");
+$application = new Application(SkelgenRecursive::NAME, SkelgenRecursive::VERSION);
 $application->add(new SkelgenRecursive());
 $application->run();

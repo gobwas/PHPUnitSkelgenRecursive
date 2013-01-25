@@ -1,8 +1,7 @@
 <?php
 namespace RecursivePHPUnitSkelgen;
+
 use RecursivePHPUnitSkelgen\Exception\ApplicationException;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Closure;
 
 class Directory extends FSEntry
@@ -10,6 +9,7 @@ class Directory extends FSEntry
 	public function __construct($entry)
 	{
 		parent::__construct($entry);
+
 		if (!is_dir($this->path)) {
 			throw new ApplicationException("Its not a directory - $entry");
 		}
@@ -25,7 +25,14 @@ class Directory extends FSEntry
 			if ($entry != "." && $entry != "..") {
 				$file = $this->path.'/'.$entry;
 				if (is_file($file)) {
-					$files[] = new File($file, $this);
+					switch (File::extension($file)) {
+						case 'php' :
+							$files[] = new FilePHP($file);
+							break;
+						default:
+							$files[] = new File($file);
+							break;
+					}
 				} else if (is_dir($file)) {
 					$files[] = new Directory($file);
 				}
@@ -60,39 +67,73 @@ class Directory extends FSEntry
 		$files = call_user_func_array($recursion, array($this->getListing(), $recursion));
 
 		if (!is_null($filter)) {
-			$filterApplier = function(File $file) use ($filter) {
-				return call_user_func_array($filter, array($file));
-			};
-			return array_filter($files, $filterApplier);
+			$files = array_filter($files, $filter);
 		}
 
 		return $files;
 	}
 
-	public static function recursiveMake(Directory $base, $path, InputInterface $input, OutputInterface $output)
+	/**
+	 * @param Directory $directory
+	 * @return mixed|null
+	 * @throws Exception\ApplicationException
+	 */
+	public function diff(Directory $directory)
 	{
-		if (strstr($path, $base->getPath())) {
-			$pathList = explode('/', str_replace($base->getPath(), '', $path));
-			$curPath = $base->getPath().'/';
-			foreach ($pathList as $path) {
-				if (!empty($path)) {
-					$curPath.= $path.'/';
-					if (!is_dir($curPath)) {
-						if ($input->getOption('prepare')) {
-							$output->writeln("<comment>Preparing generation: </comment><info>Will create directory $curPath</info>");
-						} else {
-							if (@mkdir($curPath)) {
-								$output->writeln("<comment>Successfully created directory $curPath</comment>");
-							} else {
-								$output->writeln("<error>Can not create directory $curPath</error>");
-							}
-						}
+		if (!strstr($directory->getPath(), $this->getPath())) {
+			throw new ApplicationException("Given path does not contain given base : '{$directory->getPath()}' not in '{$this->getPath()}'");
+		}
 
-					}
+		$offset = str_replace($this->getPath(), '', $directory->getPath());
+
+		return empty($offset) ? null : $offset;
+	}
+
+	/**
+	 * @param $directory
+	 * @return Directory
+	 */
+	public function appendPath($directory)
+	{
+		return new Directory($this->mkdirRecursive($directory));
+	}
+
+	/**
+	 * @param $path
+	 * @return string
+	 * @throws Exception\ApplicationException
+	 */
+	public function mkdirRecursive($path)
+	{
+		$pathList = explode('/', $path);
+
+		$curPath = $this->getPath();
+
+		foreach ($pathList as $path) {
+			if (!empty($path)) {
+				$curPath.= '/'.$path;
+				if (!is_dir($curPath)) {
+					$this->makeDir($curPath);
 				}
 			}
-		} else {
-			$output->writeln("<error>Given path does not contain given base : $path ({$base->getPath()})</error>");
 		}
+
+		return $curPath;
+	}
+
+	/**
+	 * @param $path
+	 * @throws Exception\ApplicationException
+	 */
+	public function makeDir($path)
+	{
+		if (!@mkdir($path)) {
+			throw new ApplicationException("Can not create directory '$path'");
+		}
+	}
+
+	public function __toString()
+	{
+		return $this->getPath();
 	}
 }
